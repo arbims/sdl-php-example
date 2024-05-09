@@ -20,6 +20,8 @@ $x = 1;
 $y = 1;
 $dx = 1;
 $dy = 1;
+$bar_x = 100;
+$bar_y = 600;
 $window = SDL_CreateWindow('Primitive drawing example', SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN);
 $renderer = SDL_CreateRenderer($window, 0, SDL_RENDERER_SOFTWARE);
 SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
@@ -61,27 +63,55 @@ while (!$quit) {
 
 	SDL_RenderPresent($renderer);
 
-	// Define triangle vertices
-	$vertices = array(
-		array('x' => 400, 'y' => 100, 'r' => 255), // Top vertex
-		array('x' => 200, 'y' => 400, 'g' => 0), // Bottom-left vertex
-		array('x' => 600, 'y' => 400, 'b' => 0), // Bottom-right vertex
-	);
-
-	// Draw lines between vertices to form a triangle
-	foreach ($vertices as $index => $vertex) {
-		$nextIndex = ($index + 1) % count($vertices);
-		$nextVertex = $vertices[$nextIndex];
-		SDL_RenderDrawLine($renderer, $vertex['x'], $vertex['y'], $nextVertex['x'], $nextVertex['y']);
-	}
-
+	$bar = new SDL_Rect($bar_x, $bar_y, TARGET_WIDTH, TARGET_PADD);
+	SDL_SetRenderDrawColor($renderer, 255, 0, 0, 255);
+	SDL_RenderFillRect($renderer, $bar);
 	SDL_RenderPresent($renderer);
+
+	// Define triangle vertices
+	// $vertices = array(
+	// 	array('x' => 400, 'y' => 100, 'r' => 255), // Top vertex
+	// 	array('x' => 200, 'y' => 400, 'g' => 0), // Bottom-left vertex
+	// 	array('x' => 600, 'y' => 400, 'b' => 0), // Bottom-right vertex
+	// );
+
+	// // Draw lines between vertices to form a triangle
+	// foreach ($vertices as $index => $vertex) {
+	// 	$nextIndex = ($index + 1) % count($vertices);
+	// 	$nextVertex = $vertices[$nextIndex];
+	// 	SDL_RenderDrawLine($renderer, $vertex['x'], $vertex['y'], $nextVertex['x'], $nextVertex['y']);
+	// }
+
+	// SDL_RenderPresent($renderer);
 
 	SDL_PollEvent($event);
 	SDL_Delay(10);
 
 	while (SDL_PollEvent($event)) {
-		if ($event->type == SDL_QUIT) $quit = true;
+		switch ($event->type) {
+            case SDL_QUIT:
+                $quit = true;
+                break;
+            case SDL_KEYDOWN:
+                // Check for key press events
+                $key = $event->key->keysym->sym;
+				echo chr($key). "\n";
+                if (chr($key) == 'q') {
+                    $quit = true;
+                } elseif (chr($key) == "O" && $bar_x + TARGET_WIDTH < WINDOW_WIDTH) {
+					$bar_x += 40;
+					$bar->x = $bar_x;
+					SDL_RenderPresent($renderer);
+				} elseif(chr($key) == 'P' && $bar_x > 0) {
+					$bar_x -= 40;
+					print_r($bar);
+					$bar->x = $bar_x;
+					// SDL_RenderFillRect($renderer, $bar);
+					// SDL_RenderPresent($renderer);
+					SDL_RenderPresent($renderer);
+				}
+                break;
+        }
 	}
 }
 
